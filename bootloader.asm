@@ -20,11 +20,19 @@ main_loop:
     mov ah, 0x06 ; Clear screen rectangle
     mov al, 0x00 ; Blank entire rectange
     mov bh, 0x07 ; Video attribute: white-on-black
-    mov cl, 0x4f ; Rectangle lower-right x
-    mov ch, 0x18 ; Rectangle lower-right y
+    mov cl, 0x4f ; Rectangle lower-right x (assumes 80x25)
+    mov ch, 0x18 ; Rectangle lower-right y (assumes 80x25)
     mov dx, 0x0000 ; Rectangle upper-left x and y
     int 0x10
     
+    ; Move the ball
+    mov al, [ball_x]
+    add al, [ball_vx]
+    mov [ball_x], al
+    mov al, [ball_y]
+    add al, [ball_vy]
+    mov [ball_y], al
+
     ; Draw the ball
     mov ah, 0x02 ; Set cursor position
     mov bh, 0x00 ; Video page 0
