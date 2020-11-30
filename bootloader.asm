@@ -32,6 +32,13 @@ main_loop:
     ; mov dx, 0x00 ; Rectangle upper-left x and y
     ; int 0x10
     
+    ; Hide the cursor
+    ; This has to be done every time after setting the video mode
+    mov ah, 0x01 ; Set cursor shape and size
+    mov ch, 0x20
+    mov cl, 0x20
+    int 0x10
+
     ; Bounce the ball off the borders
     cmp byte [ball_x], 0
     jne skip_left_bounce
