@@ -25,6 +25,24 @@ main_loop:
     mov dx, 0x0000 ; Rectangle upper-left x and y
     int 0x10
     
+    ; Bounce the ball off the borders
+    cmp byte [ball_x], 0
+    jne skip_left_bounce
+    mov byte [ball_vx], 1
+skip_left_bounce:
+    cmp byte [ball_x], 0x4f ; max x (assumes 80x25)
+    jne skip_right_bounce
+    mov byte [ball_vx], -1
+skip_right_bounce:
+    cmp byte [ball_y], 0
+    jne skip_top_bounce
+    mov byte [ball_vy], 1
+skip_top_bounce:
+    cmp byte [ball_y], 0x18 ; max y (assumes 80x25)
+    jne skip_bottom_bounce
+    mov byte [ball_vy], -1
+skip_bottom_bounce:
+
     ; Move the ball
     mov al, [ball_x]
     add al, [ball_vx]
