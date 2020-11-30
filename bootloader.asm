@@ -16,14 +16,21 @@ main_loop:
     je main_loop
     mov [prev_tick_low], dx
 
-    ; Clear screen
-    mov ah, 0x06 ; Clear screen rectangle
-    mov al, 0x00 ; Blank entire rectange
-    mov bh, 0x07 ; Video attribute: white-on-black
-    mov cl, 0x4f ; Rectangle lower-right x (assumes 80x25)
-    mov ch, 0x18 ; Rectangle lower-right y (assumes 80x25)
-    mov dx, 0x0000 ; Rectangle upper-left x and y
+    ; Clear screen by setting the video mode
+    ; This is inefficient, but the recommended int10h 06h doesn't seem
+    ; to work with QEMU.
+    mov ah, 0x00
+    mov al, 0x03
     int 0x10
+
+    ; Clear screen
+    ; mov ah, 0x06 ; Clear screen rectangle
+    ; mov al, 0x00 ; Blank entire rectangle
+    ; mov bh, 0x07 ; Video attribute: white-on-black
+    ; mov cl, 0x4f ; Rectangle lower-right x (assumes 80x25)
+    ; mov ch, 0x18 ; Rectangle lower-right y (assumes 80x25)
+    ; mov dx, 0x00 ; Rectangle upper-left x and y
+    ; int 0x10
     
     ; Bounce the ball off the borders
     cmp byte [ball_x], 0
