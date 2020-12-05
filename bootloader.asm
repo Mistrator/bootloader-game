@@ -23,7 +23,7 @@ main_loop:
     mov al, 0x03
     int 0x10
 
-    ; Clear screen
+    ; Clear screen the efficient way
     ; mov ah, 0x06 ; Clear screen rectangle
     ; mov al, 0x00 ; Blank entire rectangle
     ; mov bh, 0x07 ; Video attribute: white-on-black
@@ -38,6 +38,28 @@ main_loop:
     mov ch, 0x20
     mov cl, 0x20
     int 0x10
+
+    ; Read player input
+    mov ah, 0x01 ; Query keyboard status: Preview key
+    int 0x16 ; Query keyboard status
+    jz skip_move ; If no keys in buffer, skip blocking read
+    mov ah, 0x00 ; Read and remove a keystroke from the buffer
+    int 0x16
+
+    ; Move player according to input
+    cmp al, 0x61 ; 'a'
+    jne skip_move_left
+    mov bl, [player_x]
+    sub bl, 0x01
+    mov [player_x], bl
+skip_move_left:
+    cmp al, 0x64 ; 'd'
+    jne skip_move_right
+    mov bl, [player_x]
+    add bl, 0x01
+    mov [player_x], bl
+skip_move_right:
+skip_move:
 
     ; Bounce the ball off the borders
     cmp byte [ball_x], 0
@@ -65,6 +87,18 @@ skip_bottom_bounce:
     add al, [ball_vy]
     mov [ball_y], al
 
+    ; Draw player
+    mov ah, 0x02 ; Set cursor position
+    mov bh, 0x00 ; Video page 0
+    mov dh, [player_y]
+    mov dl, [player_x]
+    int 0x10
+    mov ah, 0x0a ; Write character to cursor location
+    mov al, 0xfe ; Solid block character
+    mov bh, 0x00 ; Video page 0
+    mov cx, 0x0001 ; Repeat once
+    int 0x10
+
     ; Draw the ball
     mov ah, 0x02 ; Set cursor position
     mov bh, 0x00 ; Video page 0
@@ -86,6 +120,9 @@ ball_y db 6
 
 ball_vx db 1
 ball_vy db 1
+
+player_x db 40
+player_y db 24
 
 times 510-($-$$) db 0 ; Zero-fill so that we have 510 bytes at this point
 dw 0xaa55 ; Magic bytes which tell BIOS that the program is bootable
