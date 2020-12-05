@@ -16,21 +16,16 @@ main_loop:
     je main_loop
     mov [prev_tick_low], dx
 
+; The efficient way to clear screen doesn't seem to work with QEMU, so we'll use
+; a workaround for QEMU, which can be enabled by assembling with "-D QEMU".
+; Without the flag we use the more efficient way.
+%ifdef QEMU
     ; Clear screen by setting the video mode
     ; This is inefficient, but the recommended int10h 06h doesn't seem
     ; to work with QEMU.
     mov ah, 0x00
     mov al, 0x03
     int 0x10
-
-    ; Clear screen the efficient way
-    ; mov ah, 0x06 ; Clear screen rectangle
-    ; mov al, 0x00 ; Blank entire rectangle
-    ; mov bh, 0x07 ; Video attribute: white-on-black
-    ; mov cl, 0x4f ; Rectangle lower-right x (assumes 80x25)
-    ; mov ch, 0x18 ; Rectangle lower-right y (assumes 80x25)
-    ; mov dx, 0x00 ; Rectangle upper-left x and y
-    ; int 0x10
     
     ; Hide the cursor
     ; This has to be done every time after setting the video mode
@@ -38,6 +33,17 @@ main_loop:
     mov ch, 0x20
     mov cl, 0x20
     int 0x10
+
+%else
+    ; Clear screen the efficient way
+    mov ah, 0x06 ; Clear screen rectangle
+    mov al, 0x00 ; Blank entire rectangle
+    mov bh, 0x07 ; Video attribute: white-on-black
+    mov cl, 0x4f ; Rectangle lower-right x (assumes 80x25)
+    mov ch, 0x18 ; Rectangle lower-right y (assumes 80x25)
+    mov dx, 0x00 ; Rectangle upper-left x and y
+    int 0x10
+%endif
 
     ; Read player input
     mov ah, 0x01 ; Query keyboard status: Preview key
