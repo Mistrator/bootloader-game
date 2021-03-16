@@ -67,20 +67,27 @@ skip_move_left:
 skip_move_right:
 skip_move:
 
+    ; Check whether the ball hit the bottom
+    cmp byte [ball_y], 0x18 ; max y (assumes 80x25)
+    je game_over
+
+    ; Check whether the ball bounces off player
+    cmp byte [ball_y], 0x17
+    jne skip_player_bounce ; The ball is too high, it can't hit player
+    mov al, [player_x]
+    cmp byte [ball_x], al ; Player left edge
+    jl skip_player_bounce
+    add al, [player_width]
+    cmp byte [ball_x], al ; Player right edge
+    jge skip_player_bounce
+    mov byte [ball_vy], -1
+skip_player_bounce:
+
     ; Bounce the ball off the borders
     cmp byte [ball_y], 0
     jne skip_top_bounce
     mov byte [ball_vy], 1
 skip_top_bounce:
-    cmp byte [ball_y], 0x18 ; max y (assumes 80x25)
-    je game_over ; The ball hit the bottom
-    cmp byte [ball_y], 0x17
-    jne skip_bottom_bounce ; The ball is too high, it can't hit the player
-    mov al, [player_x]
-    cmp byte [ball_x], al
-    jne skip_bottom_bounce ; The player wasn't under the ball
-    mov byte [ball_vy], -1
-skip_bottom_bounce:
     cmp byte [ball_x], 0
     jne skip_left_bounce
     mov byte [ball_vx], 1
@@ -107,7 +114,7 @@ skip_right_bounce:
     mov ah, 0x0a ; Write character to cursor location
     mov al, 0xfe ; Solid block character
     mov bh, 0x00 ; Video page 0
-    mov cx, 0x0001 ; Repeat once
+    mov cx, [player_width] ; Repeat once
     int 0x10
 
     ; Draw the ball
@@ -137,6 +144,7 @@ ball_vy db 1
 
 player_x db 40
 player_y db 24
+player_width db 10
 
 times 510-($-$$) db 0 ; Zero-fill so that we have 510 bytes at this point
 dw 0xaa55 ; Magic bytes which tell BIOS that the program is bootable
