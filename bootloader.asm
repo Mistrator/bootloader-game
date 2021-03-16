@@ -56,13 +56,13 @@ main_loop:
     cmp al, 0x61 ; 'a'
     jne skip_move_left
     mov bl, [player_x]
-    sub bl, 0x01
+    sub bl, [player_vx]
     mov [player_x], bl
 skip_move_left:
     cmp al, 0x64 ; 'd'
     jne skip_move_right
     mov bl, [player_x]
-    add bl, 0x01
+    add bl, [player_vx]
     mov [player_x], bl
 skip_move_right:
 skip_move:
@@ -144,6 +144,7 @@ ball_vy db 1
 
 player_x db 40
 player_y db 24
+player_vx db 2
 player_width db 10
 
 times 510-($-$$) db 0 ; Zero-fill so that we have 510 bytes at this point
