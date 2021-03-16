@@ -68,6 +68,19 @@ skip_move_right:
 skip_move:
 
     ; Bounce the ball off the borders
+    cmp byte [ball_y], 0
+    jne skip_top_bounce
+    mov byte [ball_vy], 1
+skip_top_bounce:
+    cmp byte [ball_y], 0x18 ; max y (assumes 80x25)
+    je game_over ; The ball hit the bottom
+    cmp byte [ball_y], 0x17
+    jne skip_bottom_bounce ; The ball is too high, it can't hit the player
+    mov al, [player_x]
+    cmp byte [ball_x], al
+    jne skip_bottom_bounce ; The player wasn't under the ball
+    mov byte [ball_vy], -1
+skip_bottom_bounce:
     cmp byte [ball_x], 0
     jne skip_left_bounce
     mov byte [ball_vx], 1
@@ -76,14 +89,6 @@ skip_left_bounce:
     jne skip_right_bounce
     mov byte [ball_vx], -1
 skip_right_bounce:
-    cmp byte [ball_y], 0
-    jne skip_top_bounce
-    mov byte [ball_vy], 1
-skip_top_bounce:
-    cmp byte [ball_y], 0x18 ; max y (assumes 80x25)
-    jne skip_bottom_bounce
-    mov byte [ball_vy], -1
-skip_bottom_bounce:
 
     ; Move the ball
     mov al, [ball_x]
@@ -119,9 +124,12 @@ skip_bottom_bounce:
     
     jmp main_loop
 
+game_over:
+    hlt
+
 prev_tick_low dw 0 ; The lower word of previous system clock tick reading
 
-ball_x db 4
+ball_x db 23
 ball_y db 6
 
 ball_vx db 1
